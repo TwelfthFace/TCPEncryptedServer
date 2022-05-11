@@ -12,8 +12,8 @@ openssl-1.1.1
 
 <h3>TODO</h3>
 <li><s>Create functionality to encrypt/decrypt input.</s></li>
-<li>Create TCP Socket for communications.</li>
-<li>Enforce RSA Encryption to prevent eavesdropping.</li>
+<li><s>Create TCP Socket for communications.</s></li>
+<li><s>Enforce RSA Encryption to prevent eavesdropping.</s></li>
 <li>Allow for pointing to pem files.</li>
 
 <h3>Compile Instructions</h3>
