@@ -12,8 +12,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-
-
     //create a socket
     int listening = socket(AF_INET, SOCK_STREAM, 0);
     if(listening == -1){
@@ -44,11 +42,14 @@ int main(int argc, char* argv[])
         return -3;
     }
 
+    cout << "Waiting for connections on: " << "0.0.0.0" << ":" << hint.sin_port << endl;
+
     while (1){
         //accept a call
         sockaddr_in client;
-        socklen_t client_size;
-
+        socklen_t client_size = sizeof(sockaddr_in);
+        char host[NI_MAXHOST];
+        char svc[NI_MAXSERV];
         int client_socket = accept(listening, (sockaddr*)&client, &client_size);
 
         if(client_socket == -1){
@@ -56,19 +57,20 @@ int main(int argc, char* argv[])
             return -4;
         }
 
-        char host[NI_MAXHOST];
-        char svc[NI_MAXSERV];
         memset(host, 0, NI_MAXHOST);
         memset(svc, 0, NI_MAXSERV);
 
         int result = getnameinfo((sockaddr*) &client, sizeof(client), host, NI_MAXHOST, svc, NI_MAXSERV, 0);
 
-        inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-        cout << host << " 2connected on " << ntohs(client.sin_port) << endl;
+        if(result){
+            cout << host << " connected on " << svc << endl;
+        }else{
+            inet_ntop(AF_INET, (sockaddr_in*) &client.sin_addr, host, NI_MAXHOST);
+            cout << host << " connected on " << ntohs(client.sin_port) << endl;
+        }
 
         //while receiving - do things
         char buf[4096];
-
         while(1){
             //clear buffer
             memset(buf, 0, 4096);
@@ -76,10 +78,11 @@ int main(int argc, char* argv[])
             int bytes_recv = recv(client_socket, buf, 4096, 0);
             if(bytes_recv == -1){
                 cerr << "connection issue..." << endl;
+                break;
             }
 
             if(bytes_recv == 0){
-                cerr << "client disconnected..." << endl;
+                cerr << host << " disconnected..." << endl;
                 break;
             }
 
@@ -89,24 +92,6 @@ int main(int argc, char* argv[])
             cout << "Recieved: " << msg;
         }
     }
-
-    //close sock
-
-    //close(client_socket);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //    Cipher test;
 //
