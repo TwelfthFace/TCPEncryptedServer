@@ -30,6 +30,7 @@ RSA* Cipher::get_public_key(){
 
 RSA* Cipher::get_private_key(){
     const unsigned char* private_key_str = Cipher::open_pem("private.pem");
+
     BIO* bio = BIO_new_mem_buf((void *)private_key_str, -1);
     BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
 
@@ -47,7 +48,6 @@ RSA* Cipher::get_private_key(){
 
 const char* Cipher::encryptRSA(RSA* key, const std::string& str){
     const unsigned char* str_data = (const unsigned char*) str.c_str();
-
 
     int rsa_length = RSA_size(key);
     unsigned char* ed = (unsigned char*) malloc(rsa_length);
