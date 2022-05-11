@@ -44,63 +44,55 @@ int main(int argc, char* argv[])
         return -3;
     }
 
-    //accept a call
-    sockaddr_in client;
-    socklen_t client_size;
-    char host[NI_MAXHOST];
-    char svc[NI_MAXSERV];
+    while (1){
+        //accept a call
+        sockaddr_in client;
+        socklen_t client_size;
 
-    int client_socket = accept(listening, (sockaddr*)&client, &client_size);
+        int client_socket = accept(listening, (sockaddr*)&client, &client_size);
 
-    if(client_socket == -1){
-        cerr << "client couldn't connect" << endl;
-        return -4;
-    }
+        if(client_socket == -1){
+            cerr << "client couldn't connect" << endl;
+            return -4;
+        }
 
-    //close the listening socket
-    close(listening);
+        char host[NI_MAXHOST];
+        char svc[NI_MAXSERV];
+        memset(host, 0, NI_MAXHOST);
+        memset(svc, 0, NI_MAXSERV);
 
-    memset(host, 0, NI_MAXHOST);
-    memset(svc, 0, NI_MAXSERV);
+        int result = getnameinfo((sockaddr*) &client, sizeof(client), host, NI_MAXHOST, svc, NI_MAXSERV, 0);
 
-    int result = getnameinfo((sockaddr*) &client, sizeof(client), host, NI_MAXHOST, svc, NI_MAXSERV, 0);
-
-    if(result){
-        cout << host << " connected on " << svc << endl;
-    }else{
         inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-        cout << host << " connected on " << ntohs(client.sin_port) << endl;
-    }
+        cout << host << " 2connected on " << ntohs(client.sin_port) << endl;
 
-    //while receiving - do things
-    char buf[4096];
-    while(true){
-        //clear buffer
-        memset(buf, 0, 4096);
-        //wait msg
-        int bytes_recv = recv(client_socket, buf, 4096, 0);
-        if(bytes_recv == -1){
-            cerr << "connection issue..." << endl;
+        //while receiving - do things
+        char buf[4096];
+
+        while(1){
+            //clear buffer
+            memset(buf, 0, 4096);
+            //wait msg
+            int bytes_recv = recv(client_socket, buf, 4096, 0);
+            if(bytes_recv == -1){
+                cerr << "connection issue..." << endl;
+            }
+
+            if(bytes_recv == 0){
+                cerr << "client disconnected..." << endl;
+                break;
+            }
+
+            std::string msg(buf, 0, bytes_recv);
+
+            //display msg
+            cout << "Recieved: " << msg;
         }
-
-        if(bytes_recv == 0){
-            cerr << "client disconnected..." << endl;
-        }
-
-        std::string msg(buf, 0, bytes_recv);
-
-        if(!msg.compare("end")){
-            break;
-        }
-
-        //display msg
-        cout << "Recieved: " << msg;
-
     }
 
     //close sock
 
-    close(client_socket);
+    //close(client_socket);
 
 
 
