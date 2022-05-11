@@ -12,6 +12,11 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    Cipher test;
+
+    RSA* rsapub = test.get_public_key();
+    RSA* rsapri = test.get_private_key();
+
     //create a socket
     int listening = socket(AF_INET, SOCK_STREAM, 0);
     if(listening == -1){
@@ -86,23 +91,10 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            std::string msg(buf, 0, bytes_recv);
+            cout << "Recieved from: " << host << ": " << buf << "DECRYPT: " << test.decryptRSA(rsapri, buf) << endl;
 
-            //display msg
-            cout << "Recieved: " << msg;
         }
     }
-
-//    Cipher test;
-//
-//    RSA* rsapub = test.get_public_key();
-//    RSA* rsapri = test.get_private_key();
-//
-//    const char* enc = test.encryptRSA(rsapub, std::string("kekwkekw"));
-//    std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(enc), 256);
-//
-//    std::cout << "ENCRYPTED: " << encoded << std::endl;
-//    std::cout << "DECRYPTED: " << test.decryptRSA(rsapri, enc) << std::endl;
 
     return 0;
 }

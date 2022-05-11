@@ -10,14 +10,13 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include "base64.h"
 
 #define PADDING RSA_PKCS1_PADDING
 #define KEYSIZE 32
 #define IVSIZE 32
 #define BLOCKSIZE 256
 #define SALT 8
-
-
 
 class Cipher
 {

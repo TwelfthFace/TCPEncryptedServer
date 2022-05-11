@@ -64,11 +64,18 @@ const char* Cipher::encryptRSA(RSA* key, const std::string& str){
 }
 
 std::string Cipher::decryptRSA(RSA* key, const char* str){
-    const unsigned char* str_data = (const unsigned char*) str;
+    std::string decode(str);
+    decode.resize(344);
+    try{
+        decode = base64_decode(decode);
+    }catch(...){
+        std::cerr << "Invalid BASE64 recieved..." << std::endl;
+        return "";
+    }
     int rsa_length = RSA_size(key);
 
     unsigned char* ed = (unsigned char*) malloc(rsa_length);
-    int result_len = RSA_private_decrypt(rsa_length, str_data, ed, key, PADDING);
+    int result_len = RSA_private_decrypt(rsa_length, (const unsigned char*)decode.c_str(), ed, key, PADDING);
 
     if(result_len == -1){
         std::cout << "Could not decrypt: " << ERR_error_string(ERR_get_error() ,NULL) << std::endl;
