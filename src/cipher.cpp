@@ -83,6 +83,7 @@ std::string Cipher::decryptRSA(RSA* key, const char* str){
     }
 
     std::string buffer(reinterpret_cast<char*>(ed));
+    buffer.resize(result_len);
 
     return buffer;
 }
