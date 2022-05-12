@@ -10,7 +10,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
-#include "base64.h"
 
 #define PADDING RSA_PKCS1_PADDING
 #define KEYSIZE 32
