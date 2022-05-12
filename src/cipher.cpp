@@ -52,54 +52,35 @@ RSA* Cipher::get_private_key(){
 }
 
 const char* Cipher::encryptRSA(RSA* key, const std::string& str){
-    //get plain text string.c_str and cast to const unsigned char* to accommodate all range of chars
     const unsigned char* str_data = (const unsigned char*) str.c_str();
 
-    //store rsa key size
     int rsa_length = RSA_size(key);
-    //allocate memory in the size of unsigned char* to store rsa key size equiv as unsigned chars
-    unsigned char* ed = (unsigned char*) malloc(rsa_length);
-    //store and check to see if encryption was successful, output encryted string to buffer ed, pad the data
-    //encrypt with public key
+    unsigned char* ed = (unsigned char*) calloc(rsa_length, sizeof(u_char));
     int result_len = RSA_public_encrypt(str.size(), (const unsigned char*)str_data, ed, key, PADDING);
-    //error check
+
     if(result_len == -1){
         std::cout << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL) << std::endl;
         return "";
     }
-    //cast the unsigned char into char
+
     char* buffer = reinterpret_cast<char*>(ed);
-    //return the buffer
+
     return buffer;
 }
 
 std::string Cipher::decryptRSA(RSA* key, const char* str){
-    //base64 decode requires string
-    std::string decode(str);
-    //resize decode to expected hash length, trim off trailing characters
-    decode.resize(344);
-    //try to decode the str, handle error if str isnt base64.
-    try{
-        decode = base64_decode(decode);
-    }catch(...){
-        std::cerr << "<Invalid BASE64 recieved...>" << std::endl;
-        return "";
-    }
-
+    const unsigned char* str_data = (const unsigned char*) str;
     int rsa_length = RSA_size(key);
 
-    unsigned char* ed = (unsigned char*) malloc(rsa_length);
-    //decrypt with private key
-    int result_len = RSA_private_decrypt(rsa_length, (const unsigned char*)decode.c_str(), ed, key, PADDING);
+    unsigned char* ed = (unsigned char*) calloc(rsa_length, sizeof(u_char));
+    int result_len = RSA_private_decrypt(rsa_length, str_data, ed, key, PADDING);
 
     if(result_len == -1){
         std::cout << "Could not decrypt: " << ERR_error_string(ERR_get_error() ,NULL) << std::endl;
         return "";
     }
 
-    std::string buffer(reinterpret_cast<char*>(ed));
-    //resize buffer to decrypted string length, trim off trash
-    buffer.resize(result_len);
+    std::string buffer(reinterpret_cast<char*>(ed), result_len);
 
     return buffer;
 }
