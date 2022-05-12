@@ -26,7 +26,7 @@ make release
 bin/Release/TCPEncryptedServer
 ```
 ### Bugs
-<li>When decrypting base64 sometimes random text will be dumped into the terminal. Possible unsafe read.</li>
+<li><s>When decrypting base64 sometimes random text will be dumped into the terminal. Possible unsafe read.</s></li>
 
 
 
