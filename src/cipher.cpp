@@ -12,23 +12,28 @@ Cipher::~Cipher()
 }
 
 RSA* Cipher::get_public_key(){
+    //open public key file
     const unsigned char* public_key_str = Cipher::open_pem("public.pem");
+    //create BIO buffer
     BIO* bio = BIO_new_mem_buf((void *)public_key_str, -1);
+    //set bio flags to expect BASE64 public key with no nulls;
     BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
-
+    //create RSA populate with BIO read of the former public key.
     RSA* rsa_pub_key = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
-
+    //error check
     if(!rsa_pub_key){
         std::cout << "Could not load Public Key..." << std::endl << ERR_error_string(ERR_get_error(), NULL);
         BIO_free(bio);
         return nullptr;
     }
-
+    //free bio because we're nice
     BIO_free(bio);
+    //return the public key
     return rsa_pub_key;
 }
 
 RSA* Cipher::get_private_key(){
+    //identical to the above func, return private key
     const unsigned char* private_key_str = Cipher::open_pem("private.pem");
 
     BIO* bio = BIO_new_mem_buf((void *)private_key_str, -1);
@@ -47,34 +52,44 @@ RSA* Cipher::get_private_key(){
 }
 
 const char* Cipher::encryptRSA(RSA* key, const std::string& str){
+    //get plain text string.c_str and cast to const unsigned char* to accommodate all range of chars
     const unsigned char* str_data = (const unsigned char*) str.c_str();
 
+    //store rsa key size
     int rsa_length = RSA_size(key);
+    //allocate memory in the size of unsigned char* to store rsa key size equiv as unsigned chars
     unsigned char* ed = (unsigned char*) malloc(rsa_length);
+    //store and check to see if encryption was successful, output encryted string to buffer ed, pad the data
+    //encrypt with public key
     int result_len = RSA_public_encrypt(str.size(), (const unsigned char*)str_data, ed, key, PADDING);
-
+    //error check
     if(result_len == -1){
         std::cout << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL) << std::endl;
         return "";
     }
-
+    //cast the unsigned char into char
     char* buffer = reinterpret_cast<char*>(ed);
-
+    //return the buffer
     return buffer;
 }
 
 std::string Cipher::decryptRSA(RSA* key, const char* str){
+    //base64 decode requires string
     std::string decode(str);
+    //resize decode to expected hash length, trim off trailing characters
     decode.resize(344);
+    //try to decode the str, handle error if str isnt base64.
     try{
         decode = base64_decode(decode);
     }catch(...){
-        std::cerr << "Invalid BASE64 recieved..." << std::endl;
+        std::cerr << "<Invalid BASE64 recieved...>" << std::endl;
         return "";
     }
+
     int rsa_length = RSA_size(key);
 
     unsigned char* ed = (unsigned char*) malloc(rsa_length);
+    //decrypt with private key
     int result_len = RSA_private_decrypt(rsa_length, (const unsigned char*)decode.c_str(), ed, key, PADDING);
 
     if(result_len == -1){
@@ -83,6 +98,7 @@ std::string Cipher::decryptRSA(RSA* key, const char* str){
     }
 
     std::string buffer(reinterpret_cast<char*>(ed));
+    //resize buffer to decrypted string length, trim off trash
     buffer.resize(result_len);
 
     return buffer;

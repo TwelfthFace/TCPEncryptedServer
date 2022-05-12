@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            cout << "Recieved from: " << host << ": " << buf << "DECRYPT: " << test.decryptRSA(rsapri, buf) << endl;
+            cout << "Recieved from: " << host << ": " << endl << buf << "DECRYPT: " << test.decryptRSA(rsapri, buf) << endl;
 
         }
     }
