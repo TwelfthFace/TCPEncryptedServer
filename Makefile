@@ -40,13 +40,37 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/TCPEncryptedServer
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/main.o $(OBJDIR_DEBUG)/src/base64.o $(OBJDIR_DEBUG)/src/cipher.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/main.o $(OBJDIR_DEBUG)/src/cipher.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/main.o $(OBJDIR_RELEASE)/src/base64.o $(OBJDIR_RELEASE)/src/cipher.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/main.o $(OBJDIR_RELEASE)/src/cipher.o
 
-all: release
+all: debug release
 
-clean: clean_release
+clean: clean_debug clean_release
+
+before_debug: 
+	test -d bin/Debug || mkdir -p bin/Debug
+	test -d $(OBJDIR_DEBUG) || mkdir -p $(OBJDIR_DEBUG)
+	test -d $(OBJDIR_DEBUG)/src || mkdir -p $(OBJDIR_DEBUG)/src
+
+after_debug: 
+
+debug: before_debug out_debug after_debug
+
+out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
+	$(LD) $(LIBDIR_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG)  $(LDFLAGS_DEBUG) $(LIB_DEBUG)
+
+$(OBJDIR_DEBUG)/main.o: main.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c main.cpp -o $(OBJDIR_DEBUG)/main.o
+
+$(OBJDIR_DEBUG)/src/cipher.o: src/cipher.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/cipher.cpp -o $(OBJDIR_DEBUG)/src/cipher.o
+
+clean_debug: 
+	rm -f $(OBJ_DEBUG) $(OUT_DEBUG)
+	rm -rf bin/Debug
+	rm -rf $(OBJDIR_DEBUG)
+	rm -rf $(OBJDIR_DEBUG)/src
 
 before_release: 
 	test -d bin/Release || mkdir -p bin/Release
@@ -63,9 +87,6 @@ out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
 $(OBJDIR_RELEASE)/main.o: main.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c main.cpp -o $(OBJDIR_RELEASE)/main.o
 
-$(OBJDIR_RELEASE)/src/base64.o: src/base64.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/base64.cpp -o $(OBJDIR_RELEASE)/src/base64.o
-
 $(OBJDIR_RELEASE)/src/cipher.o: src/cipher.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/cipher.cpp -o $(OBJDIR_RELEASE)/src/cipher.o
 
@@ -75,5 +96,5 @@ clean_release:
 	rm -rf $(OBJDIR_RELEASE)
 	rm -rf $(OBJDIR_RELEASE)/src
 
-.PHONY: before_release after_release clean_release
+.PHONY: before_debug after_debug clean_debug before_release after_release clean_release
 
