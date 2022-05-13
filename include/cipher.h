@@ -10,6 +10,7 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <cstddef>
 
 #define PADDING RSA_PKCS1_PADDING
 #define KEYSIZE 32
@@ -17,18 +18,12 @@
 #define BLOCKSIZE 256
 #define SALT 8
 
-class Cipher
-{
-    public:
-        Cipher();
-        virtual ~Cipher();
-    public:
-        RSA* get_public_key();
-        RSA* get_private_key();
-        const char* encryptRSA(RSA* pubkey, const std::string& str);
-        std::string decryptRSA(RSA* prikey, const char* str);
-    private:
-        unsigned char* open_pem(const char* file_path);
-};
+namespace cipher {
+    RSA* get_public_key();
+    RSA* get_private_key();
+    const char* encryptRSA(RSA* pubkey, const std::string& str);
+    std::string decryptRSA(RSA* prikey, const char* str);
+    unsigned char* open_pem(const char* file_path);
+}
 
 #endif // CIPHER_H

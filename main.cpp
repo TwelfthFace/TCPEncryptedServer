@@ -11,10 +11,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    Cipher test;
 
-    RSA* rsapub = test.get_public_key();
-    RSA* rsapri = test.get_private_key();
+    RSA* rsapub = cipher::get_public_key();
+    RSA* rsapri = cipher::get_private_key();
 
     //create a socket
     int listening = socket(AF_INET, SOCK_STREAM, 0);
@@ -90,12 +89,10 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            cout << "Recieved from: " << host << ": " << buf << endl << "DECRYPT: " << test.decryptRSA(rsapri, buf) << endl;
+            cout << "Recieved from: " << host << ": " << buf << endl << "DECRYPT: " << cipher::decryptRSA(rsapri, buf) << endl;
 
         }
     }
 
     return 0;
 }
-////
-//
