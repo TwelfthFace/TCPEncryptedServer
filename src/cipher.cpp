@@ -1,10 +1,11 @@
 #include "cipher.h"
+#include "base64.h"
 
 using namespace std;
 
 RSA* cipher::get_public_key(){
     //open public key file
-    const unsigned char* public_key_str = cipher::open_pem("public.pem");
+    const unsigned char* public_key_str = cipher::open_pem("publickey.crt");
     //create BIO buffer
     BIO* bio = BIO_new_mem_buf((void *)public_key_str, -1);
     //set bio flags to expect BASE64 public key with no nulls;
@@ -25,7 +26,7 @@ RSA* cipher::get_public_key(){
 
 RSA* cipher::get_private_key(){
     //identical to the above func, return private key
-    const unsigned char* private_key_str = cipher::open_pem("private.pem");
+    const unsigned char* private_key_str = cipher::open_pem("pkcs8.key");
 
     BIO* bio = BIO_new_mem_buf((void *)private_key_str, -1);
     BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
@@ -51,6 +52,7 @@ const char* cipher::encryptRSA(RSA* key, const std::string& str){
 
     if(result_len == -1){
         std::cout << "Could not encrypt: " << ERR_error_string(ERR_get_error(), NULL) << std::endl;
+        free(ed);
         return "";
     }
 
@@ -59,8 +61,9 @@ const char* cipher::encryptRSA(RSA* key, const std::string& str){
     return buffer;
 }
 
-std::string cipher::decryptRSA(RSA* key, const char* str){
-    const unsigned char* str_data = (const unsigned char*) str;
+std::string cipher::decryptRSA(RSA* key, const std::string& str){
+    std::string decoded_data = base64_decode(str);
+    const unsigned char* str_data = (const unsigned char*) decoded_data.c_str();
     int rsa_length = RSA_size(key);
 
     unsigned char* ed = (unsigned char*) calloc(rsa_length, sizeof(u_char));
@@ -68,10 +71,13 @@ std::string cipher::decryptRSA(RSA* key, const char* str){
 
     if(result_len == -1){
         std::cout << "Could not decrypt: " << ERR_error_string(ERR_get_error() ,NULL) << std::endl;
+        free(ed);
         return "";
     }
 
     std::string buffer(reinterpret_cast<char*>(ed), result_len);
+
+    free(ed);
 
     return buffer;
 }

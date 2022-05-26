@@ -9,6 +9,18 @@
 
 using namespace std;
 
+string convertToString(char* a, int size)
+{
+    int i;
+    string s = "";
+    for (i = 0; i < size; i++) {
+        if (a[i] != '\n')
+            s = s + a[i];
+    }
+    return s;
+}
+
+
 int main(int argc, char* argv[])
 {
 
@@ -45,7 +57,7 @@ int main(int argc, char* argv[])
         return -3;
     }
 
-    cout << "Waiting for connections on: " << "0.0.0.0" << ":" << hint.sin_port << endl;
+    cout << "Waiting for connections on: " << "0.0.0.0" << ":" << ntohs(hint.sin_port) << endl;
 
     while (1){
         //accept a call
@@ -89,7 +101,10 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            cout << "Recieved from: " << host << ": " << buf << endl << "DECRYPT: " << cipher::decryptRSA(rsapri, buf) << endl;
+            std::string str = convertToString(buf, 4096);
+            str.resize(343);
+
+            cout << "Recieved from: " << host << ": " << buf << endl << "DECRYPT: " << cipher::decryptRSA(rsapri, str) << endl;
 
         }
     }
