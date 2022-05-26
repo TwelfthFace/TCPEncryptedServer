@@ -10,7 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(TCPEncryptedServer
   main.cpp
   src/cipher.cpp
+  src/base64.cpp
   include/cipher.h
+  include/base64.h
 )
 
 include_directories(include)
